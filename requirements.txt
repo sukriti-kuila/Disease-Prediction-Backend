@@ -1,0 +1,7 @@
+Flask
+Flask-Cors
+gunicorn
+matplotlib
+numpy
+pandas
+scikit-learn
