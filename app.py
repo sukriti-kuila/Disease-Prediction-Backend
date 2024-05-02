@@ -12,7 +12,7 @@ app=Flask(__name__)
 CORS(app)
 # Load the PKL/JobLib files
 symptoms_list = pickle.load(open('symptoms_list_pkl.pkl','rb'))
-loaded_rf_model = load('rf_model_file.gz')
+loaded_rf_model = load('svm_model_file.gz')
 
 def format_disease_response(prediction_dict):
   formatted_response = OrderedDict()
