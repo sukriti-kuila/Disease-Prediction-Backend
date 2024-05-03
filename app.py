@@ -1,6 +1,4 @@
 import json
-import pickle
-
 from flask import Flask,request,app,jsonify,url_for,render_template
 from flask_cors import CORS
 from collections import defaultdict, OrderedDict
@@ -11,14 +9,24 @@ from joblib import load
 app=Flask(__name__)
 CORS(app)
 # Load the PKL/JobLib files
-symptoms_list = pickle.load(open('symptoms_list_pkl.pkl','rb'))
+symptoms_list = load('symptoms_file.gz')
 loaded_rf_model = load('rf_model_file.gz')
+df_specialist = load('specialist_file.gz')
+
+def find_specialist(disease):
+    specialist = df_specialist.loc[df_specialist['Disease'] == disease, 'Specialist'].values
+    print("Itt")
+    if len(specialist) > 0:
+        return f"{str(specialist[0])}"
+    else:
+        return "No Specialist"
 
 def format_disease_response(prediction_dict):
-  formatted_response = OrderedDict()
+  formatted_response = defaultdict(list)
   disease_count = 1
-  for disease, probability in prediction_dict.items():
-    formatted_response[f'Disease-{disease_count}'] = [disease, probability]
+  for disease, val in prediction_dict.items():
+    val.insert(0,disease)
+    formatted_response[f'Disease-{disease_count}'].extend(val)
     disease_count += 1
 
   return formatted_response
@@ -32,7 +40,7 @@ def predict_disease():
     try:
         req = request.get_json()
         user_symptoms = req['data']
-        print(user_symptoms)
+        # print(user_symptoms)
         if not user_symptoms:
             return jsonify({'error': 'Missing symptom data'}), 400
 
@@ -52,10 +60,15 @@ def predict_disease():
         top_3_probabilities = [predicted_probabilities[i] for i in top_3_indices]
 
 
-        top3_dict = defaultdict(float)
+        flag = False
+        c = 0
+        top3_dict = defaultdict(list)
         for disease, probability in zip(top_3_diseases, top_3_probabilities):
-            top3_dict[disease] = round(probability * 100, 2)
-
+            if c==3: break
+            specialist = find_specialist(disease)
+            top3_dict[disease].extend([round(probability * 100, 2), specialist])
+            c += 1
+        
         print(top3_dict)
         formatted_response = format_disease_response(top3_dict)
 
