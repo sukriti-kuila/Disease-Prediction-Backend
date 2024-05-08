@@ -8,14 +8,13 @@ from joblib import load
 
 app=Flask(__name__)
 CORS(app)
-# Load the PKL/JobLib files
+# Load the JobLib files
 symptoms_list = load('symptoms_file.gz')
-loaded_rf_model = load('rf_model_file.gz')
+loaded_svm_model = load('svm_model_file.gz')
 df_specialist = load('specialist_file.gz')
 
 def find_specialist(disease):
     specialist = df_specialist.loc[df_specialist['Disease'] == disease, 'Specialist'].values
-    print("Itt")
     if len(specialist) > 0:
         return f"{str(specialist[0])}"
     else:
@@ -49,25 +48,20 @@ def predict_disease():
             if val in symptoms_list:
                 user_input_vector[symptoms_list.index(val)] = 1
 
-        # Predict top 3 diseases based on the input symptoms and their probabilities
-        predicted_probabilities = loaded_rf_model.predict_proba([user_input_vector])[0]
+        # Predict top 3 diseases
+        predicted_probabilities = loaded_svm_model.predict_proba([user_input_vector])[0]
 
         # Sort the probabilities
         top_3_indices = sorted(range(len(predicted_probabilities)), key=lambda i: predicted_probabilities[i], reverse=True)[:3]
 
         # Extract top 3 diseases and their probabilities
-        top_3_diseases = [loaded_rf_model.classes_[i].strip().title() for i in top_3_indices]
+        top_3_diseases = [loaded_svm_model.classes_[i].strip().title() for i in top_3_indices]
         top_3_probabilities = [predicted_probabilities[i] for i in top_3_indices]
 
-
-        flag = False
-        c = 0
         top3_dict = defaultdict(list)
         for disease, probability in zip(top_3_diseases, top_3_probabilities):
-            if c==3: break
             specialist = find_specialist(disease)
             top3_dict[disease].extend([round(probability * 100, 2), specialist])
-            c += 1
         
         print(top3_dict)
         formatted_response = format_disease_response(top3_dict)
