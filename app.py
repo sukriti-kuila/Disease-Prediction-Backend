@@ -39,7 +39,7 @@ def predict_disease():
     try:
         req = request.get_json()
         user_symptoms = req['data']
-        # print(user_symptoms)
+
         if not user_symptoms:
             return jsonify({'error': 'Missing symptom data'}), 400
 
@@ -63,7 +63,7 @@ def predict_disease():
             specialist = find_specialist(disease)
             top3_dict[disease].extend([round(probability * 100, 2), specialist])
         
-        print(top3_dict)
+        # format the response to be send
         formatted_response = format_disease_response(top3_dict)
 
         return jsonify(formatted_response)
