@@ -20,6 +20,13 @@ def find_specialist(disease):
     else:
         return "No Specialist"
 
+def find_category(disease):
+    category = df_specialist.loc[df_specialist['Disease'] == disease, 'Category'].values
+    if len(category) > 0:
+        return f"{str(category[0])}"
+    else:
+        return "Unknown"
+
 def format_disease_response(prediction_dict):
   formatted_response = defaultdict(list)
   disease_count = 1
@@ -61,7 +68,8 @@ def predict_disease():
         top3_dict = defaultdict(list)
         for disease, probability in zip(top_3_diseases, top_3_probabilities):
             specialist = find_specialist(disease)
-            top3_dict[disease].extend([round(probability * 100, 2), specialist])
+            category = find_category(disease)
+            top3_dict[disease].extend([round(probability * 100, 2), specialist, category])
         
         # format the response to be send
         formatted_response = format_disease_response(top3_dict)
