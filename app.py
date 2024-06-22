@@ -60,7 +60,8 @@ def predict_disease():
 
         # Sort the probabilities
         top_3_indices = sorted(range(len(predicted_probabilities)), key=lambda i: predicted_probabilities[i], reverse=True)[:3]
-
+        print(top_3_indices)
+        
         # Extract top 3 diseases and their probabilities
         top_3_diseases = [loaded_svm_model.classes_[i].strip().title() for i in top_3_indices]
         top_3_probabilities = [predicted_probabilities[i] for i in top_3_indices]

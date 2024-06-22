@@ -4,4 +4,5 @@ gunicorn
 matplotlib
 numpy
 pandas
+joblib
 scikit-learn
